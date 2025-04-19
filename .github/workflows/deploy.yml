@@ -1,4 +1,4 @@
-name: Deploy to S3 with Commit Versioning
+name: Deploy to S3 with Commit VersioninG
 
 on:
   push:
