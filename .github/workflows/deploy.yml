@@ -3,32 +3,33 @@ name: Deploy to S3
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt update
-          sudo apt install -y awscli
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Install AWS CLI using pip
+      run: |
+        python -m pip install --upgrade pip
+        pip install awscli
 
-      - name: Deploy to versioned folder
-        run: |
-          aws s3 sync . s3://goblinpk/${{ github.sha }} --delete --exclude ".git/*" --exclude ".github/*"
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Deploy to "latest" folder
-        run: |
-          aws s3 sync . s3://goblinpk/latest --delete --exclude ".git/*" --exclude ".github/*"
+    - name: Deploy to S3
+      run: |
+        aws s3 sync . s3://goblinpk/latest --delete --exclude ".git/*" --exclude ".github/*"
