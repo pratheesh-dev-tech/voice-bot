@@ -27,3 +27,11 @@ jobs:
         run: |
           echo "Deploying to version: $VERSION"
           aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }}/$VERSION --delete --exclude ".git/*" --exclude ".github/*"
+          - name: Deploy to versioned folder
+  run: |
+    aws s3 sync . s3://goblinpk/${{ github.sha }} --delete --exclude ".git/*" --exclude ".github/*"
+
+- name: Deploy to "latest" for public access
+  run: |
+    aws s3 sync . s3://goblinpk/latest --delete --exclude ".git/*" --exclude ".github/*"
+
