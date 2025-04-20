@@ -1,9 +1,9 @@
-name: Deploy to S3 with Commit VersioninG
+name: Deploy to S3
 
 on:
   push:
     branches:
-      - main  # or your preferred branch
+      - main  # or your default branch
 
 jobs:
   deploy:
@@ -13,25 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Install AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y awscli
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: us-east-1
 
-      - name: Get short Git commit SHA
-        run: echo "VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
-
-      - name: Deploy to versioned folder in S3
+      - name: Deploy to versioned folder
         run: |
-          echo "Deploying to version: $VERSION"
-          aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }}/$VERSION --delete --exclude ".git/*" --exclude ".github/*"
-          - name: Deploy to versioned folder
-  run: |
-    aws s3 sync . s3://goblinpk/${{ github.sha }} --delete --exclude ".git/*" --exclude ".github/*"
+          aws s3 sync . s3://goblinpk/${{ github.sha }} --delete --exclude ".git/*" --exclude ".github/*"
 
-- name: Deploy to "latest" for public access
-  run: |
-    aws s3 sync . s3://goblinpk/latest --delete --exclude ".git/*" --exclude ".github/*"
-
+      - name: Deploy to "latest" folder
+        run: |
+          aws s3 sync . s3://goblinpk/latest --delete --exclude ".git/*" --exclude ".github/*"
